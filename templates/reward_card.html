@@ -1,0 +1,105 @@
+<!-- templates/reward_card.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Virtual Reward Card</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.0/JsBarcode.all.min.js"></script>
+    <!-- Include JsBarcode -->
+    <style>
+        .reward-card {
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 300px;
+            background-color: #f8f9fa;
+        }
+
+        .reward-card h2 {
+            color: #28a745;
+        }
+
+        .barcode {
+            margin-top: 15px;
+        }
+
+        /* Hide the canvas initially */
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reward-card" id="rewardCard">
+        <h2>Reward Card</h2>
+        <p>Name: {{ name }}</p>
+        <p>Email: {{ email }}</p>
+        <p>Reward Card ID: {{ rewardCardId }}</p>
+        <svg class="barcode" id="barcode"></svg> <!-- Placeholder for barcode -->
+        <button onclick="downloadCard()" class="btn btn-primary">Download Card</button>
+    </div>
+
+    <canvas id="canvas"></canvas> <!-- Hidden canvas for rendering the card -->
+
+    <script>
+        // Generate the barcode with the rewardCardId
+        JsBarcode("#barcode", "{{ rewardCardId }}", {
+            format: "CODE39", // You can change the format if needed
+            width: 2,
+            height: 40,
+            displayValue: true // Show the value below the barcode
+        });
+
+        function downloadCard() {
+            const rewardCard = document.getElementById('rewardCard');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas dimensions based on reward card dimensions
+            canvas.width = rewardCard.offsetWidth;
+            canvas.height = rewardCard.offsetHeight;
+
+            // Draw the reward card onto the canvas
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the text
+            ctx.fillStyle = '#28a745';
+            ctx.font = '24px Arial';
+            ctx.fillText('Reward Card', canvas.width / 2 - ctx.measureText('Reward Card').width / 2, 40);
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.fillText('Name: {{ name }}', 20, 80);
+            ctx.fillText('Email: {{ email }}', 20, 110);
+            ctx.fillText('Reward Card ID: {{ rewardCardId }}', 20, 140);
+
+            // Draw the barcode onto the canvas
+            const barcodeSVG = document.getElementById('barcode');
+            const barcodeData = new XMLSerializer().serializeToString(barcodeSVG);
+            const barcodeImage = new Image();
+
+            barcodeImage.onload = function () {
+                ctx.drawImage(barcodeImage, (canvas.width - barcodeImage.width) / 2, 160);
+                // Download the canvas as an image
+                const link = document.createElement('a');
+                link.download = 'reward_card.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+
+            // Set the source of the barcode image to the serialized SVG
+            barcodeImage.src = 'data:image/svg+xml;base64,' + btoa(barcodeData);
+        }
+    </script>
+</body>
+
+</html>

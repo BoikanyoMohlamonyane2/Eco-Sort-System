@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            /* Light background for a clean look */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            /* Full height for the body */
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            /* Full width */
+            position: fixed;
+            /* Keep it at the top */
+            top: 0;
+            /* Align to the top */
+            left: 0;
+            /* Align to the left */
+            z-index: 1000;
+            /* Stay on top */
+        }
+
+        main {
+            padding: 80px 20px 20px;
+            /* Top padding to avoid overlap with header */
+            text-align: center;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            /* Space below heading */
+        }
+
+        .chart-container {
+            width: 80%;
+            max-width: 800px;
+            /* Max width for the chart */
+            background: white;
+            /* White background for contrast */
+            border-radius: 10px;
+            /* Rounded corners */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Shadow for depth */
+            padding: 20px;
+            /* Padding inside the chart container */
+            margin-bottom: 20px;
+            /* Space below the chart container */
+        }
+
+        .button-container {
+            margin-top: 20px;
+            /* Space above buttons */
+        }
+
+        .button {
+            background-color: #4CAF50;
+            /* Green background */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            /* Transition effect */
+            margin: 0 10px;
+            /* Space between buttons */
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            /* Darker green on hover */
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Analytics Dashboard</h1>
+    </header>
+
+    <main>
+        <div class="chart-container">
+            <canvas id="pointsChart"></canvas>
+        </div>
+        <div class="button-container">
+            <button class="button" id="changeData">Change Data</button>
+            <button class="button" id="downloadChart">Download Chart</button>
+            <button class="button" id="toggleChartType">Toggle Chart Type</button>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sample data for the chart
+        const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        let dataPoints = [12, 19, 3, 5, 2, 3, 7]; // Initial data points
+        let chartType = 'bar'; // Initial chart type
+
+        const ctx = document.getElementById('pointsChart').getContext('2d');
+        const pointsChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Points Gained',
+                    data: dataPoints,
+                    backgroundColor: 'rgba(76, 175, 80, 0.6)', // Green color
+                    borderColor: 'rgba(76, 175, 80, 1)', // Darker green for border
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: '#333'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        titleColor: '#333',
+                        bodyColor: '#333'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#333' // Y-axis tick color
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#333' // X-axis tick color
+                        }
+                    }
+                }
+            }
+        });
+
+        // Change data function
+        document.getElementById('changeData').addEventListener('click', function () {
+            dataPoints = dataPoints.map(point => Math.floor(Math.random() * 20)); // Randomize data points
+            pointsChart.data.datasets[0].data = dataPoints; // Update the dataset
+            pointsChart.update(); // Refresh the chart
+        });
+
+        // Download chart function
+        document.getElementById('downloadChart').addEventListener('click', function () {
+            const link = document.createElement('a');
+            link.href = pointsChart.toBase64Image(); // Get the base64 image
+            link.download = 'chart.png'; // Set the download name
+            link.click(); // Trigger download
+        });
+
+        // Toggle chart type function
+        document.getElementById('toggleChartType').addEventListener('click', function () {
+            chartType = chartType === 'bar' ? 'line' : 'bar'; // Toggle between 'bar' and 'line'
+            pointsChart.destroy(); // Destroy the old chart instance
+            pointsChart = new Chart(ctx, { // Create a new chart instance
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Points Gained',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(76, 175, 80, 0.6)', // Green color
+                        borderColor: 'rgba(76, 175, 80, 1)', // Darker green for border
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#333'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#fff',
+                            titleColor: '#333',
+                            bodyColor: '#333'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#333' // Y-axis tick color
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#333' // X-axis tick color
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
